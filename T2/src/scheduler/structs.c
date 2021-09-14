@@ -6,7 +6,7 @@
 
 //######## PROCESS ############
 
-Process* process_init(int id, char name, int nFabrica){
+Process* process_init(int id, char* name, int nFabrica){
     Process* process = calloc(1, sizeof(Process));
     process -> id = id;
     process -> name[255] = name;
@@ -31,4 +31,38 @@ void queue_destroy(Queue* queue){
         process_destroy(queue->line[p]);
     }
     free(queue);
+}
+
+//######## Auxiliares #########
+
+int f_calculator(Queue* queue){
+    int* fabricas[queue->cant_process];
+    int fabs = 0;
+    int in = 0;
+    int f = 0;
+    for (int p=0; p<queue->cant_process; p++){
+        for (int f=0; f<queue->cant_process;f++){
+            if (fabricas[f] == queue->line[p]->nFabrica){
+                in = 1;
+            }
+        }
+        if (in == 0){
+            fabricas[fabs]=p;
+            fabs+=1;
+        } else {
+            f+=1;
+        }
+    }
+    return f;
+}
+
+int qi_calculator(int Q, Queue* queue, int fabrica, int f){
+    int ni = 0;
+    for (int p=0; p<queue->cant_process; p++){
+        if (queue->line[p]->nFabrica == fabrica){
+            ni+=1;
+        }
+    }
+    int qi = Q/(ni*f);
+    return qi;
 }
