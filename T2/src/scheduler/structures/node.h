@@ -15,3 +15,5 @@ void chain_node_destroy(Node* node);
 void chain_pull_process(Node* node);
 // A new node gets into the queue, must first give the process to entry_node:
 void chain_push_process(Node* node);
+// Pretty print state of node:
+void print_node_chain(Node* node, int states);

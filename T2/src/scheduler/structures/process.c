@@ -8,15 +8,38 @@
 
 Process* process_init(int id, char* name, int nFabrica){
     Process* process = malloc(sizeof(Process));
+    // printf("Process %d created\n", id);
     process -> id = id;
     process -> name = strdup(name);
     process -> nFabrica = nFabrica;
-    process -> state = 0;
+    process -> state = READY;
+    // printf("Just before returning Process %d created\n", id);
 
     return process;
+}
+void change_state(Process* process, int state, int clock){
+    process -> state = state;
+    printf("[t = %d] El proceso %s ha pasado de %s a\n",
+        clock, process -> name, int_to_state_string(process -> state) );
+    printf("%s.\n", int_to_state_string(state));
 }
 
 void process_destroy(Process* process){
     free(process -> name);
+    printf("Process %d destroyed\n", process -> id);
     free(process);
+}
+
+const char* int_to_state_string(ProcessStatus state) {
+    if (state == 0) {
+        return "RUNNING";
+    } else if (state == 1) {
+        return "READY";
+    } else if (state == 2) {
+        return "WAITING";
+    } else if (state == 3) {
+        return "FINISHED";
+    } else {
+        return "ERROR";
+    }
 }

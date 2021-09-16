@@ -10,13 +10,13 @@ Queue* queue_init(){
     Queue* queue = malloc(sizeof(Queue));
     
     queue -> entry_node = node_init();
-    // printf("entry node created\n");
+    printf("entry node created\n");
 
     Node* parent_node = queue -> entry_node;
-    for (int i = 0; i < 7; ++i) {
+    for (int i = 0; i < 7; i++) {
         parent_node -> next_node = node_init();
         (parent_node -> next_node) -> prev_node = parent_node;
-        // printf("Node %i created\n", i);
+        printf("Node %i created\n", i);
         parent_node = parent_node -> next_node;
     }
 
@@ -27,24 +27,35 @@ Queue* queue_init(){
 
 void queue_destroy(Queue* queue){
     chain_node_destroy(queue-> entry_node);
-    // printf("Queue destroyed\n");
+    printf("Queue destroyed\n");
     free(queue);
 }
 
-void add_new_process(Queue* queue, int id, char* name, int nFabrica){
-    Process* new_process = process_init(id, name, nFabrica);
+void add_new_process(Queue* queue, Process* new_process){
     // Si la cola está llena:
     if ((queue -> entry_node) -> process) {
-        
+        printf("La cola está llenaa, tendré que matar a %s!\n", new_process -> name);
+        process_destroy(new_process);
     } else {
+        printf("Vamos a pushear a %s al queue!\n", new_process -> name);
         (queue -> entry_node) -> process = new_process;
         chain_push_process(queue -> entry_node);
+        print_queue(queue, 0);
+        print_queue(queue, 1);
 
     }
 }
 
-int simulation_step(Queue* queue){
-    return 1;
+Process* queue_pop(Queue* queue) {
+    Process* p_from_CPU = queue -> exit_node -> process;
+    chain_pull_process(queue -> exit_node);
+    return p_from_CPU;
+
+}
+
+void print_queue(Queue* queue, int states){
+    // printf("Cola de procesos:");
+    print_node_chain(queue -> entry_node, states);
 }
 
 

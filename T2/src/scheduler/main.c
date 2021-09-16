@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include "structures/queue.h"
+#include "structures/simulation.h"
 #include "../file_manager/manager.h"
 
 int main(int argc, char **argv)
@@ -25,6 +25,7 @@ int main(int argc, char **argv)
   }
   
   int Q = 100;
+  // Read Q input value:
   if (argc == 4) {
     Q = atoi(argv[3]);
   }
@@ -32,38 +33,22 @@ int main(int argc, char **argv)
 
   if ( access( filename, F_OK ) == 0 ) {
     // if file exists, read input file
-    InputFile *file = read_file(filename);
-
-    printf("Reading file of length %i:\n", file->len);
-
-    // Initialize Queue:
-    Queue* p_queue = queue_init();
-    int finish_simulation = 0;
+    InputFile *input_file = read_file(filename);
 
     // SIMULATION START!!
-    while (!finish_simulation) {
-      finish_simulation = simulation_step(p_queue);
+    Simulation* sim = simulation_init(Q, input_file);
+    while (!is_finished(sim, 100)) {
+      simulation_step(sim);
     }
 
-    for (int i = 0; i < file->len; i++)
-    {
-      char **line = file->lines[i];
-      printf(
-          "\tProcess %s from factory %s has init time of %s and %s bursts.\n",
-          line[0], line[2], line[1], line[3]);
-      // char* p_name = line[0];
-      // int nFabrica = atoi(line[2]);
-      // // Process* process = process_init(i, nombre, nFabrica);
-      // printf("Process %s fabrica %d\n", process->name, process->nFabrica);
-    }
     // Free input file memory:
-    input_file_destroy(file);
+    input_file_destroy(input_file);
 
 
 
 
-    // Free queue memory and all of its contents:
-    queue_destroy(p_queue);
+    // Free simulation memory and all of its contents:
+    simulation_destroy(sim);
 
 
 

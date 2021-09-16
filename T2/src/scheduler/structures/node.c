@@ -39,9 +39,27 @@ void chain_node_destroy(Node* node){
     }
 
     if (node -> next_node) {
-        // printf(" Next Node will be destroyed\n");
+        printf(" Next Node will be destroyed\n");
         chain_node_destroy(node -> next_node);
     }
-    // printf(" A Node destroyed\n");
+    printf(" A Node destroyed\n");
     free(node);
+}
+
+void print_node_chain(Node* node, int states){
+    if (node -> process){
+        if (states) {
+            printf("[ %s ]", int_to_state_string(node -> process -> state));
+        } else {
+            printf("[ %s ]", node -> process -> name);
+        }
+    } else {
+            printf("[ NULL ]");
+    }
+    if (node -> next_node) {
+        printf("-> ");
+        print_node_chain(node -> next_node, states);
+    } else {
+        printf("\n");
+    }
 }
