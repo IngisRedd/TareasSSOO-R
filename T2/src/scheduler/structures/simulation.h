@@ -5,7 +5,7 @@
 
 typedef struct simulation{
 	Queue* queue;		// Process queue
-	Process* CPU;  // Pointer to a Process
+	Process* CPU;  // Pointer to a Process runinng in the CPU
 	int clock;	// Simulation clock
 	int Q;			// Input Q value default = 100
 	InputFile* input_file;		// Save pointer to input file data
@@ -27,11 +27,11 @@ void sort_new_processes(Simulation* sim, int new_p_cnt);
 Process* manage_process_in_CPU(Simulation* sim);
 // Enter the  new processes and the one from the CPU into the queue:
 void enter_processes_into_queue(Simulation* sim, Process* p_from_CPU);
-// Update waiting process:
+// Enter next process into CPU and set it to RUNNING:
 void execute_next_process(Simulation* sim);
 // Update process statistics:
 void update_process_statistics(Simulation* sim);
-// Run one step of the simulation:
+// Update waiting process:
 void update_waiting_process(Simulation* sim);
-// Enter next process into CPU and set it to RUNNING:
+// Run one step of the simulation:
 void simulation_step(Simulation* sim);
