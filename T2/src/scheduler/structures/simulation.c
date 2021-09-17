@@ -18,7 +18,10 @@ Simulation* simulation_init(int Q, InputFile* input_file){
     sim -> fp_cnt = 0;       // finished process counter
 
     sim -> input_file = input_file;
-    // p_init_times contains initial times for each process.
+
+    // all_processes contains pointer to all created processes:
+    sim -> all_processes = malloc((input_file -> len) * sizeof(Process*));
+    // p_init_times contains initial times for each process:
     sim -> p_init_times = malloc((input_file -> len) * sizeof(int));
     for (int i = 0; i < input_file -> len; i++)
     {
@@ -63,8 +66,9 @@ Process* create_process_from_index(Simulation* sim, int i){
         atoi(line[2])
     );
     printf("[t = %d] El proceso %s ha sido creado.\n", sim -> clock, line[0]);
+    sim -> all_processes[sim -> np_cnt] = process;
     (sim -> np_cnt)++;
-    
+
     return process;
 }
 
