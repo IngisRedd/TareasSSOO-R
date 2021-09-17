@@ -69,8 +69,8 @@ Process* create_process_from_index(Simulation* sim, int i){
 }
 
 void sort_new_processes(Simulation* sim, int new_p_cnt){
-    //Ordenar procesos por prioridad de llegada
-    // 3.1) Con menor n  ́umero de f ́abrica f.
+    // Ordenar los new_p_cnt primeros procesos del array (sim -> new_processes) por prioridad de llegada:
+    // 3.1) Con menor número de fábrica f.
     // 3.2) Con menor NOMBRE PROCESO. Para esta parte deber ́as usar strcmp.
 }
 
