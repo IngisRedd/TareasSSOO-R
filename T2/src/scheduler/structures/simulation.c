@@ -143,6 +143,35 @@ void execute_next_process(Simulation* sim){
     // Si no hay ninguno:
     if (!(sim -> CPU)) {
         printf("[t = %d] No hay ningun proceso ejecutando en la CPU.\n", sim -> clock);
+        Node* node = sim -> queue -> entry_node;
+        int ready = 0;
+        for (int n = 0; n < 7; n++){
+            if (node -> process != NULL && node -> process -> state == READY){
+                ready = 1;
+                printf("HAY UN PROCESO LISTO EN COLA\n");
+            }
+            if (node -> next_node != NULL){
+                Node* next_node = node -> next_node; 
+                node = next_node;
+            }
+        }
+        if (ready == 1){
+            printf("ENTRAMOS\n");
+            int found = 0;
+            while (found < 7){
+                Process* process = queue_pop(sim -> queue);
+                printf("POP PROCESO %u\n", process -> state);
+                if (process != NULL && process -> state == READY){
+                    printf("ENTRANDO A CPU\n");
+                    sim -> CPU = process;
+                    found = 8;
+                } else {
+                    printf("DEVUELTO\n");
+                    add_new_process(sim -> queue, process);
+                    found++;
+                }
+            }
+        }
     }
 
 }
