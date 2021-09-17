@@ -153,8 +153,20 @@ void update_process_statistics(Simulation* sim){
 }
 
 void update_waiting_process(Simulation* sim){
-    // WAITING a READY 
-    // printf("Update waiting procesess\n");
+    Node* node = sim -> queue -> entry_node;
+    for (int n = 0; n < 7; n++){
+        if (node -> process != NULL && node -> process -> state == WAITING){
+            int next_burst_time = node -> process -> burst_cum_times[node -> process -> burst_cnt];
+            int total_burst_time = node -> process -> turnos_CPU + node -> process -> waiting_time;
+            if (next_burst_time == total_burst_time){
+                node -> process -> state = READY;
+            }
+        }
+        if (node -> next_node != NULL){
+            Node* next_node = node -> next_node; 
+            node = next_node;
+        }
+    }
 }
 
 void simulation_step(Simulation* sim){

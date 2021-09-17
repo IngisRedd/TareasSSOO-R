@@ -37,13 +37,6 @@ int main(int argc, char **argv)
     // Initialize Simulation an all other structs:
     Simulation* sim = simulation_init(Q, input_file);
 
-    // Queue* queue = queue_init(50);
-    // queue -> p_por_fabrica_cnt[0] = 1;
-    // queue -> p_por_fabrica_cnt[1] = 1;
-    // queue -> p_por_fabrica_cnt[2] = 0;
-    // queue -> p_por_fabrica_cnt[3] = 1;
-
-    // printf("CALCULO qi: %d\n", qi_calculator(queue, 3));
 
     // Free input file memory:
     input_file_destroy(input_file);
@@ -55,20 +48,20 @@ int main(int argc, char **argv)
 
 
 
-
-
-    // Free simulation memory and all of its contents:
-    simulation_destroy(sim);
-
-
-
     // Create output file
     FILE *fp; 
     fp  = fopen (outputname, "w");
     if (fp != NULL) {
-      fprintf(fp, "Aqui va el output \n");
+      for (int p = 0; p < sim -> total_p; p++){
+        Process* process = sim -> all_processes[p];
+        fprintf(fp, "%s %d %d %d %d %d \n", process -> name, process ->turnos_CPU, process -> interrupciones,
+                process -> turnaround_time, process -> response_time, (process -> waiting_time + process -> ready_time));
+      }
     }
     fclose (fp);
+
+    // Free simulation memory and all of its contents:
+    simulation_destroy(sim);
   
   } else {
     // if input file doesn't exist
