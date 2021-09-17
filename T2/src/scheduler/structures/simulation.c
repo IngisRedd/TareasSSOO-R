@@ -37,8 +37,15 @@ Simulation* simulation_init(int Q, InputFile* input_file){
 
 void simulation_destroy(Simulation* sim){
     queue_destroy(sim-> queue);
+    // Destroy all processes:
+    for (int i = 0; i < sim -> np_cnt; i++) {
+        printf("Process %s will be destroyed\n", sim -> all_processes[i] -> name);
+        process_destroy((sim -> all_processes)[i]);
+    }
+    free(sim -> all_processes);
     free(sim -> p_init_times);
-    // printf("Simulation destroyed\n");
+    
+    printf("Simulation destroyed\n");
     free(sim);
 }
 

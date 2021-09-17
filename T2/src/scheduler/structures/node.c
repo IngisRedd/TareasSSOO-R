@@ -34,9 +34,9 @@ void chain_push_process(Node* node){
 }
 
 void chain_node_destroy(Node* node){
-    if (node -> process) {
-        process_destroy(node -> process);
-    }
+    // if (node -> process) {
+    //     process_destroy(node -> process);
+    // }
 
     if (node -> next_node) {
         printf(" Next Node will be destroyed\n");
