@@ -26,7 +26,7 @@ typedef struct process{
 } Process;
 
 Process* process_init(int id, InputFile* input_file);
-void change_state(Process* process, int state, int clock);
+void change_state(Process* process, ProcessStatus state, int clock);
 void process_destroy(Process* process);
 // Recieves an ProcessStatus and returns the corresponding state as a string:
 const char* int_to_state_string(ProcessStatus state);

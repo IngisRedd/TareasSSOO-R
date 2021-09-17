@@ -59,6 +59,19 @@ Process* queue_pop(Queue* queue) {
     return p_from_CPU;
 }
 
+int qi_calculator(Queue* queue, int nFabrica){
+    int ni;
+    int f = 0;
+    ni = queue -> p_por_fabrica_cnt[nFabrica - 1];
+    for (int fb = 0; fb < 4; fb++){
+        if (queue -> p_por_fabrica_cnt[fb] != 0){
+            f++;
+        }
+    }
+    int qi = (queue -> Q)/(ni*f);
+    return qi;
+}
+
 void print_queue(Queue* queue, int states){
     // printf("Cola de procesos:");
     print_node_chain(queue -> entry_node, states);

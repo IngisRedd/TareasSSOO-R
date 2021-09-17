@@ -15,8 +15,7 @@ void queue_destroy(Queue* queue);
 void add_new_process(Queue* queue, Process* new_process);
 // Get last item from queue and move the rest forward
 Process* queue_pop(Queue* queue);
+// Calculates quantum for each fabrica:
+int qi_calculator(Queue* queue, int nFabrica);
 // Print queue full status in console. It can print process names or states
 void print_queue(Queue* queue, int states);
-
-// int f_calculator(Queue* queue);
-
