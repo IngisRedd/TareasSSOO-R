@@ -11,10 +11,9 @@ Simulation* simulation_init(int Q, InputFile* input_file){
     
     // Initialize Queue, CPU, clock:
     printf("Sim will create queue\n");
-    sim -> queue = queue_init();
+    sim -> queue = queue_init(Q);
     // printf("after creating queue\n");
     sim -> CPU = NULL;
-    sim -> Q = Q;
     sim -> clock = 0;
     sim -> total_p = input_file -> len;
     sim -> np_cnt = 0;       // new process counter
@@ -74,9 +73,25 @@ int is_finished(Simulation* sim, int dev_mode){
 }
 
 void sort_new_processes(Simulation* sim, int new_p_cnt){
-    // Ordenar los new_p_cnt primeros procesos del array (sim -> new_processes) por prioridad de llegada:
-    // 3.1) Con menor número de fábrica f.
-    // 3.2) Con menor NOMBRE PROCESO. Para esta parte deber ́as usar strcmp.
+    int x, y, min;
+    Process* tmp;
+    for(x = 0; x < new_p_cnt; x++) {
+        min = x;
+        for(y = x + 1; y < new_p_cnt; y++) {
+            if(sim -> new_processes[min] -> nFabrica > sim -> new_processes[y] -> nFabrica) {
+                min = y;
+            } else if (sim -> new_processes[min] ->nFabrica == sim -> new_processes[y] -> nFabrica){
+                int name_compare;
+                name_compare = strcasecmp(sim -> new_processes[min] -> name, sim -> new_processes[y] -> name);
+                if (name_compare > 0){
+                    min = y;
+                }
+            }
+        }
+        tmp = sim -> new_processes[min];
+        sim -> new_processes[min] = sim -> new_processes[x];
+        sim -> new_processes[x] = tmp;
+    }
 }
 
 Process* manage_process_in_CPU(Simulation* sim){
@@ -162,4 +177,18 @@ void simulation_step(Simulation* sim){
         update_waiting_process(sim);
     // printf("Se  terminó el turno %d\n", sim -> clock);
     (sim -> clock)++;
+}
+
+
+int qi_calculator(Queue* queue, int nFabrica){
+    int ni;
+    int f = 0;
+    ni = queue -> p_por_fabrica_cnt[nFabrica - 1];
+    for (int fb = 0; fb < 4; fb++){
+        if (queue -> p_por_fabrica_cnt[fb] != 0){
+            f++;
+        }
+    }
+    int qi = (queue -> Q)/(ni*f);
+    return qi;
 }

@@ -6,10 +6,14 @@
 
 //######## QUEUE ############
 
-Queue* queue_init(){
+Queue* queue_init(int Q){
     Queue* queue = malloc(sizeof(Queue));
     
     queue -> entry_node = node_init();
+    queue -> Q = Q;
+    for (int i = 0; i < 4; i++) {
+        queue -> p_por_fabrica_cnt[i] = 0;
+    }
     printf("entry node created\n");
 
     Node* parent_node = queue -> entry_node;
@@ -43,53 +47,19 @@ void add_new_process(Queue* queue, Process* new_process){
         chain_push_process(queue -> entry_node);
         print_queue(queue, 0);
         print_queue(queue, 1);
-
+        queue -> p_por_fabrica_cnt[(new_process -> nFabrica) - 1]++;
     }
 }
 
 Process* queue_pop(Queue* queue) {
     Process* p_from_CPU = queue -> exit_node -> process;
     chain_pull_process(queue -> exit_node);
-    return p_from_CPU;
+    queue -> p_por_fabrica_cnt[(p_from_CPU -> nFabrica) - 1]--;
 
+    return p_from_CPU;
 }
 
 void print_queue(Queue* queue, int states){
     // printf("Cola de procesos:");
     print_node_chain(queue -> entry_node, states);
 }
-
-
-// //######## Auxiliares #########
-
-// int f_calculator(Queue* queue){
-//     int* fabricas[queue->cant_process];
-//     int fabs = 0;
-//     int in = 0;
-//     int f = 0;
-//     for (int p=0; p<queue->cant_process; p++){
-//         for (int f=0; f<queue->cant_process;f++){
-//             if (fabricas[f] == queue->line[p]->nFabrica){
-//                 in = 1;
-//             }
-//         }
-//         if (in == 0){
-//             fabricas[fabs]=p;
-//             fabs+=1;
-//         } else {
-//             f+=1;
-//         }
-//     }
-//     return f;
-// }
-
-// int qi_calculator(int Q, Queue* queue, int fabrica, int f){
-//     int ni = 0;
-//     for (int p=0; p<queue->cant_process; p++){
-//         if (queue->line[p]->nFabrica == fabrica){
-//             ni+=1;
-//         }
-//     }
-//     int qi = Q/(ni*f);
-//     return qi;
-// }
