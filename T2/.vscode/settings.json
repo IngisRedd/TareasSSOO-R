@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "iterator": "c",
+        "__tuple": "c",
+        "array": "c"
+    }
+}
