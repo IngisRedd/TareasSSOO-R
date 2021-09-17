@@ -83,6 +83,25 @@ void sort_new_processes(Simulation* sim, int new_p_cnt){
     // Ordenar los new_p_cnt primeros procesos del array (sim -> new_processes) por prioridad de llegada:
     // 3.1) Con menor número de fábrica f.
     // 3.2) Con menor NOMBRE PROCESO. Para esta parte deber ́as usar strcmp.
+    int x, y, min;
+    Process* tmp;
+    for(x = 0; x < new_p_cnt; x++) {
+        min = x;
+        for(y = x + 1; y < new_p_cnt; y++) {
+            if(sim -> new_processes[min] -> nFabrica > sim -> new_processes[y] -> nFabrica) {
+                min = y;
+            } else if (sim -> new_processes[min] ->nFabrica == sim -> new_processes[y] -> nFabrica){
+                int name_compare;
+                name_compare = strcasecmp(sim -> new_processes[min] -> name, sim -> new_processes[y] -> name);
+                if (name_compare > 0){
+                    min = y;
+                }
+            }
+        }
+        tmp = sim -> new_processes[min];
+        sim -> new_processes[min] = sim -> new_processes[x];
+        sim -> new_processes[x] = tmp;
+    }
 }
 
 Process* manage_process_in_CPU(Simulation* sim){
