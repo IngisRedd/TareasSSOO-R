@@ -12,6 +12,7 @@ typedef struct simulation{
 	int np_cnt;			// new process counter
   int fp_cnt;     // finished process counter
 	int* p_init_times;		// array with init_times of processes
+	Process** all_processes; // array of pointers to all created processe. Lenght = input_file -> len.
 	Process* new_processes[8]; // array of pointers to created processes in current step. 
 } Simulation;
 

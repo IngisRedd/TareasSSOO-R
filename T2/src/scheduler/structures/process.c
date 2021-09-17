@@ -13,8 +13,15 @@ Process* process_init(int id, char* name, int nFabrica){
     process -> name = strdup(name);
     process -> nFabrica = nFabrica;
     process -> state = READY;
-    // printf("Just before returning Process %d created\n", id);
+    
+    // Stats:
+    process -> turnos_CPU = 0; 
+    process -> interrupciones = 0;
+    process -> turnaround_time = 0;
+    process -> response_time = 0;
+    process -> waiting_time = 0;
 
+    // printf("Just before returning Process %d created\n", id);
     return process;
 }
 void change_state(Process* process, int state, int clock){
