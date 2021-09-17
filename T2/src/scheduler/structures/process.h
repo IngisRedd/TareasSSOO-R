@@ -1,3 +1,5 @@
+#include "../../file_manager/manager.h"
+
 //######## ENUM ############
 typedef enum processStatus{
     RUNNING,
@@ -12,14 +14,18 @@ typedef struct process{
     char* name;
     int nFabrica;
     ProcessStatus state;
-    int turnos_CPU;         // N° turnos en CPU
-    int interrupciones;     // N° de veces interrumpido por terminar quantum
-    int turnaround_time;    // N° turnos en el sistema (queue + CPU)
-    int response_time;      // N° turnos hasta ser atendido
-    int waiting_time;       // N° turnos en estado READY o WAITING
+    int total_bursts;       // N° total de bursts (I/O o CPU).
+    int* burst_cum_times;   // Arreglo de largo total_bursts, con el tiempo acumulado de cada burst.
+    int burst_cnt;          // Contador de bursts (I/O o CPU) terminados.
+    int turnos_CPU;         // N° turnos en CPU.
+    int interrupciones;     // N° de veces interrumpido por terminar quantum.
+    int turnaround_time;    // N° turnos en el sistema (queue + CPU).
+    int response_time;      // N° turnos hasta ser atendido por primera vez.
+    int waiting_time;       // N° turnos en estado WAITING.
+    int ready_time;         // N° turnos en estado READY.
 } Process;
 
-Process* process_init(int id, char* name, int nFabrica);
+Process* process_init(int id, InputFile* input_file);
 void change_state(Process* process, int state, int clock);
 void process_destroy(Process* process);
 // Recieves an ProcessStatus and returns the corresponding state as a string:

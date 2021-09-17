@@ -6,20 +6,37 @@
 
 //######## PROCESS ############
 
-Process* process_init(int id, char* name, int nFabrica){
+Process* process_init(int id, InputFile* input_file){
     Process* process = malloc(sizeof(Process));
+    printf("Process %d created\n", id);
     // printf("Process %d created\n", id);
     process -> id = id;
-    process -> name = strdup(name);
-    process -> nFabrica = nFabrica;
+
+    char **if_p_data;   // Input file process data for this process.
+    if_p_data = (input_file -> lines)[id];
+    process -> name = strdup(if_p_data[0]);
+    process -> nFabrica = atoi(if_p_data[2]);
     process -> state = READY;
+    process -> total_bursts = atoi(if_p_data[3]);
+    process -> burst_cum_times = malloc((process -> total_bursts) * sizeof(int));
+    printf("Process %d created burst cum times len %d\n", id, process -> total_bursts);
     
+    // Se rellena burst_cum_times con el tiempo acumulado de cada burst
+    int time_cnt = 0;
+    for (int i = 0; i < (process -> total_bursts); i++) {
+        printf("Will read input file %d\n", 4 + i);
+        time_cnt += atoi(if_p_data[4 + i]);
+        process -> burst_cum_times[i] = time_cnt;
+    }
+
     // Stats:
+    process -> burst_cnt = 0; 
     process -> turnos_CPU = 0; 
     process -> interrupciones = 0;
     process -> turnaround_time = 0;
     process -> response_time = 0;
     process -> waiting_time = 0;
+    process -> ready_time = 0;
 
     // printf("Just before returning Process %d created\n", id);
     return process;
@@ -33,6 +50,7 @@ void change_state(Process* process, int state, int clock){
 
 void process_destroy(Process* process){
     free(process -> name);
+    free(process -> burst_cum_times);
     printf("Process %d destroyed\n", process -> id);
     free(process);
 }

@@ -34,22 +34,25 @@ int main(int argc, char **argv)
     // if file exists, read input file
     InputFile *input_file = read_file(filename);
 
-    // SIMULATION START!!
+    // Initialize Simulation an all other structs:
     Simulation* sim = simulation_init(Q, input_file);
 
-    Queue* queue = queue_init(50);
-    queue -> p_por_fabrica_cnt[0] = 1;
-    queue -> p_por_fabrica_cnt[1] = 1;
-    queue -> p_por_fabrica_cnt[2] = 0;
-    queue -> p_por_fabrica_cnt[3] = 1;
+    // Queue* queue = queue_init(50);
+    // queue -> p_por_fabrica_cnt[0] = 1;
+    // queue -> p_por_fabrica_cnt[1] = 1;
+    // queue -> p_por_fabrica_cnt[2] = 0;
+    // queue -> p_por_fabrica_cnt[3] = 1;
 
-    printf("CALCULO qi: %d\n", qi_calculator(queue, 3));
+    // printf("CALCULO qi: %d\n", qi_calculator(queue, 3));
+
+    // Free input file memory:
+    input_file_destroy(input_file);
+
+    // SIMULATION START!!
     while (!is_finished(sim, 100)) {
       simulation_step(sim);
     }
-    
-    // Free input file memory:
-    input_file_destroy(input_file);
+
 
 
 

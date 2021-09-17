@@ -1,6 +1,6 @@
 #include "simulation.h"
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h> 
 #include <string.h>
 #include <stdbool.h>
 
@@ -10,17 +10,24 @@ Simulation* simulation_init(int Q, InputFile* input_file){
     Simulation* sim = malloc(sizeof(Simulation));
     
     // Initialize Queue, CPU, clock:
+    printf("Sim will create queue\n");
     sim -> queue = queue_init(Q);
+    // printf("after creating queue\n");
     sim -> CPU = NULL;
-    sim -> Q = Q;
     sim -> clock = 0;
+    sim -> total_p = input_file -> len;
     sim -> np_cnt = 0;       // new process counter
     sim -> fp_cnt = 0;       // finished process counter
 
-    sim -> input_file = input_file;
-
-    // all_processes contains pointer to all created processes:
+    // all_processes contains pointers to all created processes:
+    printf("Sim will create all %d process\n", sim -> total_p);
     sim -> all_processes = malloc((input_file -> len) * sizeof(Process*));
+    for (int i = 0; i < sim -> total_p; i++) {
+        printf("Sim will create process %d\n", i);
+        sim -> all_processes[i] = process_init(i, input_file);
+        printf("Sim after create process %d\n", i);
+    }
+
     // p_init_times contains initial times for each process:
     sim -> p_init_times = malloc((input_file -> len) * sizeof(int));
     for (int i = 0; i < input_file -> len; i++)
@@ -38,7 +45,7 @@ Simulation* simulation_init(int Q, InputFile* input_file){
 void simulation_destroy(Simulation* sim){
     queue_destroy(sim-> queue);
     // Destroy all processes:
-    for (int i = 0; i < sim -> np_cnt; i++) {
+    for (int i = 0; i < sim -> total_p; i++) {
         printf("Process %s will be destroyed\n", sim -> all_processes[i] -> name);
         process_destroy((sim -> all_processes)[i]);
     }
@@ -57,26 +64,12 @@ int is_finished(Simulation* sim, int dev_mode){
     }
 
     // This is real
-    if (sim -> fp_cnt == (sim -> input_file -> len)) {
+    if (sim -> fp_cnt == sim -> total_p) {
         return 1;
     } else {
         return 0;
     }
 
-}
-
-Process* create_process_from_index(Simulation* sim, int i){
-    char **line = sim -> input_file -> lines[i];
-    Process* process = process_init(
-        sim -> np_cnt,
-        line[0],
-        atoi(line[2])
-    );
-    printf("[t = %d] El proceso %s ha sido creado.\n", sim -> clock, line[0]);
-    sim -> all_processes[sim -> np_cnt] = process;
-    (sim -> np_cnt)++;
-
-    return process;
 }
 
 void sort_new_processes(Simulation* sim, int new_p_cnt){
@@ -102,45 +95,46 @@ void sort_new_processes(Simulation* sim, int new_p_cnt){
 }
 
 Process* manage_process_in_CPU(Simulation* sim){
-    Process* p_from_CPU = NULL;       // Proceso salido de la CPU
+    // Process* p_in_CPU = sim -> CPU;     // Proceso en la CPU.
+    Process* p_out_of_CPU = NULL;       // Proceso salido de la CPU.
+
     // IF Proceso cede la CPU, pasa a WAITING, y se va al final de la cola.
-        p_from_CPU = sim -> CPU;
+
+        p_out_of_CPU = sim -> CPU;
     // ELSE IF Proceso termina su ejecución, pasa a FINISHED y sale del sistema.
     // ELSE IF Proceso consume todo su quantum, pasa a READY y se va al final de la cola.
-        p_from_CPU = sim -> CPU;
+        p_out_of_CPU = sim -> CPU;
     // ELSE, el proceso continua en RUNNING.
-    return p_from_CPU;
+    return p_out_of_CPU;
 }
 
-void enter_processes_into_queue(Simulation* sim, Process* p_from_CPU){
+void enter_processes_into_queue(Simulation* sim, Process* p_out_of_CPU){
     Queue* queue = sim -> queue;
-    if (p_from_CPU) {
-        add_new_process(queue, p_from_CPU);
+    if (p_out_of_CPU) {
+        add_new_process(queue, p_out_of_CPU);
     }
 
-    int new_p_pos_arr[8];    // Array para guardar posiciones de los nuevos procesos.
+    // Se ingresan los nuevos procesos al sistema:
     int new_p_cnt = 0;    // Contador de nuevos procesos, suponemos que hay máximo 8.
-    
-    // Vemos cuantos procesos nuevos hay que crear:
-    for (int i = 0; i < (sim -> input_file-> len); i++){
+    for (int i = 0; i < (sim -> total_p); i++){
         if (sim -> p_init_times[i] == sim -> clock) {
-            new_p_pos_arr[new_p_cnt] = i;
+            Process* new_p = sim -> all_processes[i];
+            sim -> new_processes[new_p_cnt] = new_p;
+            printf("[t = %d] El proceso %s ha sido creado.\n", sim -> clock, new_p -> name);
+
+            (sim -> np_cnt)++;
             new_p_cnt++;
         }
     }
 
-    if (new_p_cnt) {
-        // Se crean los nuevos procesos:
-        for (int i = 0; i < new_p_cnt; i++){
-            sim -> new_processes[i] = create_process_from_index(sim, new_p_pos_arr[i]);
-            printf("After creating 1 new process\n");
-        }
-        // Se ordenan:
+    // Si hay + de 1 nuevo proceso, se ordenan:
+    if (new_p_cnt > 1) {
         sort_new_processes(sim, new_p_cnt);
-        // Se ingresan a la cola:
-        for (int i = 0; i < new_p_cnt; i++){
-            add_new_process(queue, sim -> new_processes[i]);
-        }
+        printf("after sorting new processes\n");
+    }
+    // Se ingresan a la cola:
+    for (int i = 0; i < new_p_cnt; i++){
+        add_new_process(queue, sim -> new_processes[i]);
     }
 }
 
@@ -166,13 +160,13 @@ void update_waiting_process(Simulation* sim){
 void simulation_step(Simulation* sim){
     // printf("Parte el turno %d\n", sim -> clock);
 
-    Process* p_from_CPU = NULL;       // Proceso salido de la CPU
+    Process* p_out_of_CPU = NULL;       // Proceso salido de la CPU
     // 1. Si hay un proceso en la CPU:
         if (sim -> CPU) {
-            p_from_CPU = manage_process_in_CPU(sim);  // Proceso salido de la CPU
+            p_out_of_CPU = manage_process_in_CPU(sim);  // Proceso salido de la CPU
         }    
     // 2. Procesos creados entran a la cola, incluyendo el proceso que salga de la CPU:
-        enter_processes_into_queue(sim, p_from_CPU);
+        enter_processes_into_queue(sim, p_out_of_CPU);
     // 3. Si no hay un proceso en la CPU:
         if (!(sim -> CPU)) {
             execute_next_process(sim);

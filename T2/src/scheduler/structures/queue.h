@@ -5,7 +5,7 @@
 typedef struct queue{
     Node* entry_node;
     Node* exit_node;
-    int Q;
+    int Q;      // Input Q value default = 100
     int p_por_fabrica_cnt[4];
 } Queue;
 
