@@ -10,7 +10,7 @@ Simulation* simulation_init(int Q, InputFile* input_file){
     Simulation* sim = malloc(sizeof(Simulation));
     
     // Initialize Queue, CPU, clock:
-    sim -> queue = queue_init();
+    sim -> queue = queue_init(Q);
     sim -> CPU = NULL;
     sim -> Q = Q;
     sim -> clock = 0;
@@ -80,9 +80,6 @@ Process* create_process_from_index(Simulation* sim, int i){
 }
 
 void sort_new_processes(Simulation* sim, int new_p_cnt){
-    // Ordenar los new_p_cnt primeros procesos del array (sim -> new_processes) por prioridad de llegada:
-    // 3.1) Con menor número de fábrica f.
-    // 3.2) Con menor NOMBRE PROCESO. Para esta parte deber ́as usar strcmp.
     int x, y, min;
     Process* tmp;
     for(x = 0; x < new_p_cnt; x++) {
@@ -186,4 +183,18 @@ void simulation_step(Simulation* sim){
         update_waiting_process(sim);
     // printf("Se  terminó el turno %d\n", sim -> clock);
     (sim -> clock)++;
+}
+
+
+int qi_calculator(Queue* queue, int nFabrica){
+    int ni;
+    int f = 0;
+    ni = queue -> p_por_fabrica_cnt[nFabrica - 1];
+    for (int fb = 0; fb < 4; fb++){
+        if (queue -> p_por_fabrica_cnt[fb] != 0){
+            f++;
+        }
+    }
+    int qi = (queue -> Q)/(ni*f);
+    return qi;
 }

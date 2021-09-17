@@ -36,3 +36,5 @@ void update_process_statistics(Simulation* sim);
 void update_waiting_process(Simulation* sim);
 // Run one step of the simulation:
 void simulation_step(Simulation* sim);
+// Calculates qi
+int qi_calculator(Queue* queue, int nFabrica);
