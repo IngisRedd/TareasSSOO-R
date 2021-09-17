@@ -41,11 +41,37 @@ Process* process_init(int id, InputFile* input_file){
     // printf("Just before returning Process %d created\n", id);
     return process;
 }
-void change_state(Process* process, int state, int clock){
-    process -> state = state;
-    printf("[t = %d] El proceso %s ha pasado de %s a\n",
-        clock, process -> name, int_to_state_string(process -> state) );
-    printf("%s.\n", int_to_state_string(state));
+void change_state(Process* p, ProcessStatus next_state, int clock){
+    // Si el proceso terminó:
+        if (next_state == FINISHED){
+            printf("[t = %d] El proceso %s terminó y sale del sistema\n",
+                clock,
+                p -> name
+            );
+        } else {
+            printf("[t = %d] El proceso %s ha pasado de %s a %s\n",
+                clock,
+                p -> name,
+                int_to_state_string(p -> state),
+                int_to_state_string(next_state)
+            );
+        }
+
+    
+    // Si se le acaba el cuantum y es interrumpido
+        // if ((p -> state == RUNNING) && (next_state == READY)){
+        //     p -> interrupciones++;
+        // }
+    // Si termina algún burst:
+        // else if ( 
+        //     ((p -> state == RUNNING) && (next_state == WAITING))
+        //     || ((p -> state == WAITING) && (next_state == READY))
+        //     || ((p -> state == RUNNING) && (next_state == FINISHED))
+        // ){
+        //     p -> burst_cnt++;
+        // }
+
+    p -> state = next_state;
 }
 
 void process_destroy(Process* process){

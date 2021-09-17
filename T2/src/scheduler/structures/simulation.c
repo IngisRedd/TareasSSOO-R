@@ -15,6 +15,8 @@ Simulation* simulation_init(int Q, InputFile* input_file){
     // printf("after creating queue\n");
     sim -> CPU = NULL;
     sim -> clock = 0;
+    sim -> CPU_clock = 0;
+    sim -> current_quantum = 0;
     sim -> total_p = input_file -> len;
     sim -> np_cnt = 0;       // new process counter
     sim -> fp_cnt = 0;       // finished process counter
@@ -95,16 +97,37 @@ void sort_new_processes(Simulation* sim, int new_p_cnt){
 }
 
 Process* manage_process_in_CPU(Simulation* sim){
-    // Process* p_in_CPU = sim -> CPU;     // Proceso en la CPU.
+    Process* pr = sim -> CPU;     // Proceso en la CPU.
     Process* p_out_of_CPU = NULL;       // Proceso salido de la CPU.
+    
+    pr -> turnos_CPU++;   // Sumamos 1 al tiempo running del proceso.
 
-    // IF Proceso cede la CPU, pasa a WAITING, y se va al final de la cola.
-
-        p_out_of_CPU = sim -> CPU;
-    // ELSE IF Proceso termina su ejecución, pasa a FINISHED y sale del sistema.
+    // IF Proceso termina su burst CPU:
+        int next_burst_time = pr -> burst_cum_times[pr -> burst_cnt];
+        int total_burst_time = pr -> turnos_CPU + pr -> waiting_time;
+        if (total_burst_time == next_burst_time){
+            pr -> burst_cnt++;
+            sim -> CPU = NULL;
+            // IF Proceso termina su ejecución, pasa a FINISHED y sale del sistema.
+                if (pr -> burst_cnt == pr -> total_bursts) {
+                    change_state(pr, FINISHED, sim -> clock);
+                }
+            // IF Proceso cede la CPU, pasa a WAITING, y se va al final de la cola.
+                else {
+                    change_state(pr, WAITING, sim -> clock);
+                    p_out_of_CPU = pr;
+                }
+        }
     // ELSE IF Proceso consume todo su quantum, pasa a READY y se va al final de la cola.
-        p_out_of_CPU = sim -> CPU;
+        else if (sim -> CPU_clock == sim -> current_quantum){
+            pr -> interrupciones++;
+            sim -> CPU_clock = 0;
+            sim -> CPU = NULL;
+            change_state(pr, READY, sim -> clock);
+            p_out_of_CPU = pr;
+        } 
     // ELSE, el proceso continua en RUNNING.
+ 
     return p_out_of_CPU;
 }
 
@@ -126,7 +149,6 @@ void enter_processes_into_queue(Simulation* sim, Process* p_out_of_CPU){
             new_p_cnt++;
         }
     }
-
     // Si hay + de 1 nuevo proceso, se ordenan:
     if (new_p_cnt > 1) {
         sort_new_processes(sim, new_p_cnt);
@@ -177,18 +199,4 @@ void simulation_step(Simulation* sim){
         update_waiting_process(sim);
     // printf("Se  terminó el turno %d\n", sim -> clock);
     (sim -> clock)++;
-}
-
-
-int qi_calculator(Queue* queue, int nFabrica){
-    int ni;
-    int f = 0;
-    ni = queue -> p_por_fabrica_cnt[nFabrica - 1];
-    for (int fb = 0; fb < 4; fb++){
-        if (queue -> p_por_fabrica_cnt[fb] != 0){
-            f++;
-        }
-    }
-    int qi = (queue -> Q)/(ni*f);
-    return qi;
 }

@@ -5,7 +5,9 @@
 typedef struct simulation{
 	Queue* queue;		// Process queue
 	Process* CPU;  // Pointer to a Process runinng in the CPU
-	int clock;	// Simulation clock
+	int clock;			// Simulation clock
+	int CPU_clock;	// CPU clock, resets every time a new process enters CPU.
+	int current_quantum;	// Quantum for current running process.
 	int total_p;			// Total numeber  of processes for that simulation
 	int np_cnt;			// new process in system counter
   int fp_cnt;     // finished process counter
@@ -32,5 +34,3 @@ void update_process_statistics(Simulation* sim);
 void update_waiting_process(Simulation* sim);
 // Run one step of the simulation:
 void simulation_step(Simulation* sim);
-// Calculates qi
-int qi_calculator(Queue* queue, int nFabrica);
