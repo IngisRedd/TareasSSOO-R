@@ -16,12 +16,12 @@ Queue* queue_init(){
     for (int i = 0; i < 7; i++) {
         parent_node -> next_node = node_init();
         (parent_node -> next_node) -> prev_node = parent_node;
-        printf("Node %i created\n", i);
+        printf("Node %i created\n", i + 1);
         parent_node = parent_node -> next_node;
     }
 
     queue -> exit_node = parent_node;
-    
+
     return queue;
 }
 
@@ -33,6 +33,7 @@ void queue_destroy(Queue* queue){
 
 void add_new_process(Queue* queue, Process* new_process){
     // Si la cola está llena:
+    printf("Queue va a ingresar nuevo proceso %s!\n", new_process -> name);
     if ((queue -> entry_node) -> process) {
         printf("La cola está llenaa, tendré que matar a %s!\n", new_process -> name);
         process_destroy(new_process);

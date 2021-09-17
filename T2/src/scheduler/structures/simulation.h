@@ -1,5 +1,4 @@
 #include "queue.h"
-#include "../../file_manager/manager.h"
 
 //######## SIMULATION ############
 
@@ -8,8 +7,8 @@ typedef struct simulation{
 	Process* CPU;  // Pointer to a Process runinng in the CPU
 	int clock;	// Simulation clock
 	int Q;			// Input Q value default = 100
-	InputFile* input_file;		// Save pointer to input file data
-	int np_cnt;			// new process counter
+	int total_p;			// Total numeber  of processes for that simulation
+	int np_cnt;			// new process in system counter
   int fp_cnt;     // finished process counter
 	int* p_init_times;		// array with init_times of processes
 	Process** all_processes; // array of pointers to all created processe. Lenght = input_file -> len.
@@ -20,8 +19,6 @@ Simulation* simulation_init(int Q, InputFile* input_file);
 void simulation_destroy(Simulation* simulation);
 // Returns 1 if all processes have finished, or when clock > dev_mode:
 int is_finished(Simulation* sim, int dev_mode);
-// Creates a new process with its id:
-Process* create_process_from_index(Simulation* sim, int index);
 // Recieves an array of new processes and sorts it so they enter the queue right:
 void sort_new_processes(Simulation* sim, int new_p_cnt);
 // Deal with the process runing on the CPU on that step:

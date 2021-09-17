@@ -35,14 +35,17 @@ int main(int argc, char **argv)
     // if file exists, read input file
     InputFile *input_file = read_file(filename);
 
-    // SIMULATION START!!
+    // Initialize Simulation an all other structs:
     Simulation* sim = simulation_init(Q, input_file);
+
+    // Free input file memory:
+    input_file_destroy(input_file);
+
+    // SIMULATION START!!
     while (!is_finished(sim, 100)) {
       simulation_step(sim);
     }
 
-    // Free input file memory:
-    input_file_destroy(input_file);
 
 
 
