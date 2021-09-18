@@ -32,3 +32,4 @@ void change_state(Process* process, ProcessStatus state, int clock);
 void process_destroy(Process* process);
 // Recieves an ProcessStatus and returns the corresponding state as a string:
 const char* int_to_state_string(ProcessStatus state);
+void print_process(Process* process);

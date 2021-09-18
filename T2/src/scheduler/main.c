@@ -7,7 +7,7 @@
 
 int main(int argc, char **argv)
 {
-  printf("Hello T2!\n");
+  // printf("Hello T2!\n");
 
   if (argc != 3 && argc != 4) {
     printf("Expected 3 or 4 arguments, recieved %d\n", argc);
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
     input_file_destroy(input_file);
 
     // SIMULATION START!!
-    while (!is_finished(sim, 100)) {
+    while (!is_finished(sim, 0)) {
       simulation_step(sim);
     }
 
@@ -54,8 +54,13 @@ int main(int argc, char **argv)
     if (fp != NULL) {
       for (int p = 0; p < sim -> total_p; p++){
         Process* process = sim -> all_processes[p];
-        fprintf(fp, "%s %d %d %d %d %d \n", process -> name, process ->turnos_CPU, process -> interrupciones,
-                process -> turnaround_time, process -> response_time, (process -> waiting_time + process -> ready_time));
+        fprintf(fp, "%s,%d,%d,%d,%d,%d\n",
+          process -> name,
+          process -> turnos_CPU,
+          process -> interrupciones,
+          process -> turnaround_time,
+          process -> response_time,
+          (process -> waiting_time + process -> ready_time));
       }
     }
     fclose (fp);

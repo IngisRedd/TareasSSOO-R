@@ -10,7 +10,7 @@ Simulation* simulation_init(int Q, InputFile* input_file){
     Simulation* sim = malloc(sizeof(Simulation));
     
     // Initialize Queue, CPU, clock:
-    printf("Sim will create queue\n");
+    // printf("Sim will create queue\n");
     sim -> queue = queue_init(Q);
     // printf("after creating queue\n");
     sim -> CPU = NULL;
@@ -22,12 +22,12 @@ Simulation* simulation_init(int Q, InputFile* input_file){
     sim -> fp_cnt = 0;       // finished process counter
 
     // all_processes contains pointers to all created processes:
-    printf("Sim will create all %d process\n", sim -> total_p);
+    // printf("Sim will create all %d process\n", sim -> total_p);
     sim -> all_processes = malloc((input_file -> len) * sizeof(Process*));
     for (int i = 0; i < sim -> total_p; i++) {
-        printf("Sim will create process %d\n", i);
+        // printf("Sim will create process %d\n", i);
         sim -> all_processes[i] = process_init(i, input_file);
-        printf("Sim after create process %d\n", i);
+        // printf("Sim after create process %d\n", i);
     }
 
     // p_init_times contains initial times for each process:
@@ -48,13 +48,13 @@ void simulation_destroy(Simulation* sim){
     queue_destroy(sim-> queue);
     // Destroy all processes:
     for (int i = 0; i < sim -> total_p; i++) {
-        printf("Process %s will be destroyed\n", sim -> all_processes[i] -> name);
+        // printf("Process %s will be destroyed\n", sim -> all_processes[i] -> name);
         process_destroy((sim -> all_processes)[i]);
     }
     free(sim -> all_processes);
     free(sim -> p_init_times);
     
-    printf("Simulation destroyed\n");
+    // printf("Simulation destroyed\n");
     free(sim);
 }
 
@@ -116,6 +116,9 @@ Process* manage_process_in_CPU(Simulation* sim){
                     change_state(pr, WAITING, sim -> clock);
                     p_out_of_CPU = pr;
                 }
+            if (sim -> CPU_clock == sim -> current_quantum) {
+                pr -> interrupciones++;
+            }
         }
     // ELSE IF Proceso consume todo su quantum, pasa a READY y se va al final de la cola.
         else if (sim -> CPU_clock == sim -> current_quantum){
@@ -151,7 +154,7 @@ void enter_processes_into_queue(Simulation* sim, Process* p_out_of_CPU){
     // Si hay + de 1 nuevo proceso, se ordenan:
     if (new_p_cnt > 1) {
         sort_new_processes(sim, new_p_cnt);
-        printf("after sorting new processes\n");
+        // printf("after sorting new processes\n");
     }
     // Se ingresan a la cola:
     for (int i = 0; i < new_p_cnt; i++){
@@ -162,49 +165,62 @@ void enter_processes_into_queue(Simulation* sim, Process* p_out_of_CPU){
 
 void execute_next_process(Simulation* sim){
     //  se elige uno para que pase a RUNNING.
+    Process* pr;
+                        // Se actualiza el quantum:
+
     // Si no hay ninguno:
     if (!(sim -> CPU)) {
-        printf("[t = %d] No hay ningun proceso ejecutando en la CPU.\n", sim -> clock);
-        Node* node = sim -> queue -> entry_node;
-        int ready = 0;
-        for (int n = 0; n < 7; n++){
-            if (node -> process != NULL && node -> process -> state == READY){
-                ready = 1;
-                printf("HAY UN PROCESO LISTO EN COLA\n");
-            }
-            if (node -> next_node != NULL){
-                Node* next_node = node -> next_node; 
-                node = next_node;
-            }
-        }
-        if (ready == 1){
-            printf("ENTRAMOS\n");
             int found = 0;
             while (found < 7){
-                Process* process = queue_pop(sim -> queue);
-                printf("POP PROCESO %u\n", process -> state);
-                if (process != NULL && process -> state == READY){
-                    printf("ENTRANDO A CPU\n");
-                    sim -> CPU = process;
-                    found = 8;
+                pr = queue_pop(sim -> queue);
+                // printf("proceso poopeado\n");
+                if (pr) {
+                    if (pr -> state == READY){
+                        // printf("ENTRANDO A CPU\n");
+                        if (!pr -> turnaround_time) {
+                            change_state(pr, RUNNING, sim -> clock - 1);
+                        } else {
+                            change_state(pr, RUNNING, sim -> clock);
+                        }
+                        sim -> CPU = pr;
+                        // Se resetean el reloj de la CPU y el valor del quantum:
+                        sim -> CPU_clock = 0;
+                        sim -> current_quantum = qi_calculator(sim -> queue, pr -> nFabrica);
+                        // printf("current cuantum: %d\n", sim -> current_quantum);
+                        // printf("CPU_clock: %d\n", sim -> CPU_clock);
+
+                        if (pr -> response_time == -1) {
+                            // printf("Probando dos responsetimes distintos: %d == %d\n",
+                            // pr -> ready_time, 
+                            // sim -> clock - pr -> init_time
+                            // );
+                            pr -> response_time = pr -> ready_time;
+                        }
+                        found = 8;
+
+                    } else {
+                        // printf("DEVUELTO\n");
+                        add_new_process(sim -> queue, pr);
+                        found++;
+                    }
+
                 } else {
-                    printf("DEVUELTO\n");
-                    add_new_process(sim -> queue, process);
-                    found++;
+                    // printf("Parece que la cola esta VACIAAAAAAAAAAAA\n");
+                    found = 8;
                 }
             }
-        }
+        // }
     }
-
+    if (!(sim -> CPU)) {
+        printf("[t = %d] No hay ningun proceso ejecutando en la CPU.\n", sim -> clock + 1);
+    }
 }
 
 void update_process_statistics(Simulation* sim){
     Process* pr;
     for (int i = 0; i < sim -> total_p; i++){
         pr = sim -> all_processes[i];
-
         if (pr -> state != FINISHED && pr -> state != UNBORN) {
-        } else {
             pr -> turnaround_time++;
             if (pr -> state == RUNNING) {
                 pr -> turnos_CPU++;   // Sumamos 1 al tiempo running del proceso.
@@ -213,6 +229,8 @@ void update_process_statistics(Simulation* sim){
             } else if (pr -> state == WAITING){
                 pr -> waiting_time++;   // Sumamos 1 al tiempo waiting del proceso.
             }
+            // printf("After updating:\n");
+            // print_process(pr);
         }
     }
     //  Si un proceso salió de la CPU, se considera como su hubiera estado RUNNING.
@@ -221,11 +239,12 @@ void update_process_statistics(Simulation* sim){
 void update_waiting_process(Simulation* sim){
     Node* node = sim -> queue -> entry_node;
     Process* pr;
-    for (int n = 0; n < 7; n++){
+    for (int n = 0; n < 8; n++){
         pr = node -> process;
         if ((pr != NULL) && (pr -> state == WAITING)){
             int next_burst_time = pr -> burst_cum_times[pr -> burst_cnt];
             int total_burst_time = pr -> turnos_CPU + pr -> waiting_time;
+            // printf("Next burst time para %s: %d\n", pr->name,next_burst_time);
             if (next_burst_time == total_burst_time){
                 change_state(pr, READY, sim -> clock);
                 pr -> burst_cnt++;
@@ -238,23 +257,30 @@ void update_waiting_process(Simulation* sim){
 }
 
 void simulation_step(Simulation* sim){
-    // printf("Parte el turno %d\n", sim -> clock);
+    // printf("\n\nParte el turno %d\n", sim -> clock);
 
     Process* p_out_of_CPU = NULL;       // Proceso salido de la CPU
     // 1. Si hay un proceso en la CPU:
         if (sim -> CPU) {
             p_out_of_CPU = manage_process_in_CPU(sim);  // Proceso salido de la CPU
         }    
+    // printf("Se manegea el proceso en CPU \n");
     // 2. Procesos creados entran a la cola, incluyendo el proceso que salga de la CPU:
         enter_processes_into_queue(sim, p_out_of_CPU);
+    // printf("Se meten procesos en cola \n");
     // 3. Si no hay un proceso en la CPU:
         if (!(sim -> CPU)) {
             execute_next_process(sim);
         }
+    // printf("Se ejecuta nuevo proceso en CPU\n");
     // 4. Se actualizan las estadísticas de los procesos:
         update_process_statistics(sim);
+    // printf("Se actualizan las estadísticas de los procesos\n");
     // 5. Los procesos WAITING que terminaron su I/O Burst (Bi) pasan a READY:
         update_waiting_process(sim);
+    // print_queue(sim -> queue, 0);
+    // print_queue(sim -> queue, 1);
     // printf("Se  terminó el turno %d\n", sim -> clock);
     (sim -> clock)++;
+    (sim -> CPU_clock)++;
 }
