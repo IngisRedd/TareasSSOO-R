@@ -15,8 +15,9 @@ Process* process_init(int id, InputFile* input_file){
     char **if_p_data;   // Input file process data for this process.
     if_p_data = (input_file -> lines)[id];
     process -> name = strdup(if_p_data[0]);
+    process -> init_time = atoi(if_p_data[1]);
     process -> nFabrica = atoi(if_p_data[2]);
-    process -> state = READY;
+    process -> state = UNBORN;
     process -> total_bursts = atoi(if_p_data[3]);
     process -> burst_cum_times = malloc((process -> total_bursts) * sizeof(int));
     printf("Process %d created burst cum times len %d\n", id, process -> total_bursts);

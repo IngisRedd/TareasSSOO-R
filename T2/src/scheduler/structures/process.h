@@ -6,12 +6,14 @@ typedef enum processStatus{
     READY,
     WAITING,
     FINISHED,
+    UNBORN,
 }ProcessStatus;
 
 //######## PROCESS ############
 typedef struct process{
     int id;
     char* name;
+    int init_time;
     int nFabrica;
     ProcessStatus state;
     int total_bursts;       // N° total de bursts (I/O o CPU).
