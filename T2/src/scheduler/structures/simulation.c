@@ -100,8 +100,6 @@ Process* manage_process_in_CPU(Simulation* sim){
     Process* pr = sim -> CPU;     // Proceso en la CPU.
     Process* p_out_of_CPU = NULL;       // Proceso salido de la CPU.
     
-    pr -> turnos_CPU++;   // Sumamos 1 al tiempo running del proceso.
-
     // IF Proceso termina su burst CPU:
         int next_burst_time = pr -> burst_cum_times[pr -> burst_cnt];
         int total_burst_time = pr -> turnos_CPU + pr -> waiting_time;
@@ -111,6 +109,7 @@ Process* manage_process_in_CPU(Simulation* sim){
             // IF Proceso termina su ejecución, pasa a FINISHED y sale del sistema.
                 if (pr -> burst_cnt == pr -> total_bursts) {
                     change_state(pr, FINISHED, sim -> clock);
+                    sim -> fp_cnt++;
                 }
             // IF Proceso cede la CPU, pasa a WAITING, y se va al final de la cola.
                 else {
@@ -156,6 +155,7 @@ void enter_processes_into_queue(Simulation* sim, Process* p_out_of_CPU){
     }
     // Se ingresan a la cola:
     for (int i = 0; i < new_p_cnt; i++){
+        sim -> new_processes[i] -> state = READY;
         add_new_process(queue, sim -> new_processes[i]);
     }
 }
@@ -170,23 +170,40 @@ void execute_next_process(Simulation* sim){
 }
 
 void update_process_statistics(Simulation* sim){
+    Process* pr;
+    for (int i = 0; i < sim -> total_p; i++){
+        pr = sim -> all_processes[i];
+
+        if (pr -> state != FINISHED && pr -> state != UNBORN) {
+        } else {
+            pr -> turnaround_time++;
+            if (pr -> state == RUNNING) {
+                pr -> turnos_CPU++;   // Sumamos 1 al tiempo running del proceso.
+            } else if (pr -> state == READY){
+                pr -> ready_time++;   // Sumamos 1 al tiempo ready del proceso.
+            } else if (pr -> state == WAITING){
+                pr -> waiting_time++;   // Sumamos 1 al tiempo waiting del proceso.
+            }
+        }
+    }
     //  Si un proceso salió de la CPU, se considera como su hubiera estado RUNNING.
-    // printf("Update statistics\n");
 }
 
 void update_waiting_process(Simulation* sim){
     Node* node = sim -> queue -> entry_node;
+    Process* pr;
     for (int n = 0; n < 7; n++){
-        if (node -> process != NULL && node -> process -> state == WAITING){
-            int next_burst_time = node -> process -> burst_cum_times[node -> process -> burst_cnt];
-            int total_burst_time = node -> process -> turnos_CPU + node -> process -> waiting_time;
+        pr = node -> process;
+        if ((pr != NULL) && (pr -> state == WAITING)){
+            int next_burst_time = pr -> burst_cum_times[pr -> burst_cnt];
+            int total_burst_time = pr -> turnos_CPU + pr -> waiting_time;
             if (next_burst_time == total_burst_time){
-                node -> process -> state = READY;
+                change_state(pr, READY, sim -> clock);
+                pr -> burst_cnt++;
             }
         }
         if (node -> next_node != NULL){
-            Node* next_node = node -> next_node; 
-            node = next_node;
+            node = node -> next_node;
         }
     }
 }
